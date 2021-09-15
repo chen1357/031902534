@@ -1,52 +1,69 @@
 import sys
 import string
 from pypinyin import lazy_pinyin 
+import seperation
 
 class chinese:
     def __init__(self, word):
         self.word=word
-        self.count=0#出现次数
+        #self.count=0#出现次数
         self.length=len(word)#长度
         self.pinyin=lazy_pinyin(word)#拼音
-        self.pinyinLen=[]
+        self.pinyinLen=[]#拼音长度
+        self.seperation=[]
         for pinyin in self.pinyin:
             self.pinyinLen.append(len(pinyin))
-    def check(self,wd):
+        for w in word:
+            s=seperation.seperate(w)
+            if s !="0":
+                self.seperation.append(s)
+            else:
+                self.seperation.append("")
+    def testing(self,wd):
         text=""
         str="".join(lazy_pinyin(wd[0]))
-        if str[0] == self.pinyin[0][0] or wd[0].lower()== self.pinyin[0][0] :
+        if str[0] == self.pinyin[0][0] or wd[0].lower()== self.pinyin[0][0] or wd[0]==self.seperation[0][0]:
             i=0
             j=0
+            insert=0
             while(j<len(wd)):
-                if i == self.length:
+                if i == self.length or insert == 20 :
                     break
                 str1 = "".join(lazy_pinyin(wd[j]))
-                if wd[j].lower() == self.pinyin[i][0] or str1 == self.pinyin[i] :
+                if j+2 <=len(wd) and wd[j:j+2]==self.seperation[i]:#拆字
+                    text+=wd[j:j+2]
+                    j+=1
+                    i+=1
+                    insert=0
+                elif wd[j].lower() == self.pinyin[i][0] or str1 == self.pinyin[i] :#同音字或原文
                     text+=wd[j]
                     i+=1
-                elif j+self.pinyinLen[i]<=len(wd) and (wd[j:j+self.pinyinLen[i]]).lower()==self.pinyin[i]:
+                    insert=0
+                elif j+self.pinyinLen[i]<=len(wd) and (wd[j:j+self.pinyinLen[i]]).lower()==self.pinyin[i]:#全拼音
                     text+=wd[j:j+self.pinyinLen[i]]
                     j=j+self.pinyinLen[i]-1
                     i+=1
-                elif wd[j].lower() ==self.pinyin[i][0]:
+                    insert=0
+                elif wd[j].lower() ==self.pinyin[i][0]:#拼音首字母
                     text+=wd[j]
                     i+=1
+                    insert=0
                 elif wd[j] in string.digits+string.ascii_letters+"[\n`~!@#$%^&*()+-_=|{}':;',\\[\\].<>/?~！\"@#￥%……&*()——+|{}【】‘；：”“’。， 、？]":
                     text+=wd[j]
+                    insert+=1
                 else:
                     break
                 j+=1
-            if i==self.length :
-                self.count+=1
-                return text
-        return "0"
+            if i!=self.length:
+                text=""
+        return text,len(text)
 
 class english:
     def __init__(self, word):
         self.word=word
-        self.count=0#出现次数
+        #self.count=0#出现次数
         self.length=len(word)#长度
-    def check(self,wd):
+    def testing(self,wd):
         text=""
         i=0
         if wd[0].lower() == self.word[0].lower():
@@ -62,75 +79,69 @@ class english:
                     text+=wd[j]
                 else:
                     break
-            if i==self.length:
-                return text
-        return "0"
+            if i!=self.length:
+                    text=""
+        return text,len(text)
 
-           
+def getWords(address):#获取敏感词
+    chinesew=[]#中文
+    englishw=[]#英文
+    wordsFile=open(address,'r',encoding='utf-8')
+    for line in wordsFile.readlines():
+        line=line.strip()
+        if line[0] in string.ascii_letters:
+            englishw.append(english(line))
+        else:
+            chinesew.append(chinese(line))
+    wordsFile.close()
+    return chinesew,englishw
 
 
 
 
-
-
+def search(address,chiWords,engWords):
+    file=open(address,'r',encoding='utf-8')
+    lineCount=0
+    result=[]
+    totalCount=0#敏感词个数
+    textLen=0
+    for line in file.readlines():#读取每行
+        lineCount+=1
+        line=line.strip()
+        i=0
+        while(i<len(line)):
+            for wd in engWords:
+                text,textLen=wd.testing(line[i:])
+                if textLen:
+                    totalCount+=1
+                    result.append("Line{}: <{}> {}".format(lineCount,wd.word,text))
+                    i+=textLen-1
+                    break
+            for wd in chiWords:
+                text,textLen=wd.testing(line[i:])
+                if textLen:
+                    totalCount+=1
+                    result.append("Line{}: <{}> {}".format(lineCount,wd.word,text))
+                    i+=textLen-1
+                    break
+            i+=1
+    file.close()
+    return result,totalCount
 
 
 
 #文件地址读取
-wordsAddress=(sys.argv[1])#命令行传敏感词文件地址
-fileAddress=(sys.argv[2])#文件地址
-answerAddress=(sys.argv[3])#答案文件地址
-
-
-
-
-
-
-
-
+wordsAddress=(sys.argv[1])#敏感词文件
+fileAddress=(sys.argv[2])#内容文件
+answerAddress=(sys.argv[3])#答案文件
 
 #敏感词读取
-wordsFile=open(wordsAddress,'r',encoding='utf-8')#打开文件
-chiWords=[]#敏感词列表
-engWords=[]
-for line in wordsFile.readlines():#读取敏感词
-    line=line.strip()
-    if line[0] in string.ascii_letters:
-        engWords.append(english(line))
-    else:
-        chiWords.append(chinese(line))
-wordsFile.close()#关闭文件
-
-
+chiWords,engWords=getWords(wordsAddress)#中文，英文
 
 #文本检测
-file=open(fileAddress,'r',encoding='utf-8')#打开文件
-lineCount=0
-result=[]
-totalCount=0#敏感词个数
-for line in file.readlines():#读取每行
-    lineCount+=1
-    line=line.strip()
-    i=0
-    while(i<len(line)):
-        for wd in engWords:
-            text=wd.check(line[i:])
-            if text!="0":
-                totalCount+=1
-                result.append("Line{}: <{}> {}".format(lineCount,wd.word,text))
-                i+=wd.length-1
-                break
-        for wd in chiWords:
-            text=wd.check(line[i:])
-            if text!="0":
-                totalCount+=1
-                result.append("Line{}: <{}> {}".format(lineCount,wd.word,text))
-                i+=wd.length-1
-                break
-        i+=1
-file.close()
+result,total=search(fileAddress,chiWords,engWords)
 
 #写入文件
 with open(answerAddress,'w',encoding='utf-8') as answer:
-    answer.write("Total: {} ".format(totalCount)+'\n')
+    answer.write("Total: {} ".format(total)+'\n')
     answer.write('\n'.join(result))
