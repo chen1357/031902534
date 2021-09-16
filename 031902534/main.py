@@ -140,24 +140,29 @@ def parament():#命令行参数检查
         print("命令行参数错误")
         raise Exception("命令行参数错误")
 
-parament()
+def main():
+    parament()
 
-#文件地址读取
-wordsAddress=(sys.argv[1])#敏感词文件
-textAddress=(sys.argv[2])#内容文件
-answerAddress=(sys.argv[3])#答案文件
+    #文件地址读取
+    wordsAddress=(sys.argv[1])#敏感词文件
+    textAddress=(sys.argv[2])#内容文件
+    answerAddress=(sys.argv[3])#答案文件
 
-#敏感词读取
-chiWords,engWords=getWords(wordsAddress)#中文，英文
+    #敏感词读取
+    chiWords,engWords=getWords(wordsAddress)#中文，英文
 
-#文本检测
-textFile=fileOpen(textAddress)
-lines=textFile.readlines()
-result,total=search(lines,chiWords,engWords)
-textFile.close()
+    #文本检测
+    textFile=fileOpen(textAddress)
+    lines=textFile.readlines()
+    result,total=search(lines,chiWords,engWords)
+    textFile.close()
 
-#写入文件
-answerFile=fileOpen(answerAddress)
-answerFile.write("Total: {} ".format(total)+'\n')
-answerFile.write('\n'.join(result))
-answerFile.close()
+    #写入文件
+    answerFile=fileOpen(answerAddress)
+    answerFile.write("Total: {} ".format(total)+'\n')
+    answerFile.write('\n'.join(result))
+    answerFile.close()
+
+
+if __name__ == '__main__':
+    main()
