@@ -47,7 +47,7 @@ class chinese:
                     text+=wd[j]
                     i+=1
                     insert=0
-                elif wd[j] in string.digits+string.ascii_letters+"[\n`~!@#$%^&*()+-_=|{}':;',\\[\\].<>/?~！\"@#￥%……&*()——+|{}【】‘；：”“’。， 、？]":
+                elif wd[j] in string.digits+string.ascii_letters+"[\n`~!@#$%^&*()+-_=|{}《》':;',\\[\\].<>/?~！\"@#￥%……&*()——+|{}【】‘；：”“’。， 、？]":
                     text+=wd[j]
                     insert+=1
                 else:
@@ -73,7 +73,7 @@ class english:
                 if wd[j].lower() == self.word[i].lower():
                     text+=wd[j]
                     i+=1
-                elif wd[j] in string.digits+"[\n`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*()——+|{}【】\"‘；：”“’。， 、？]":
+                elif wd[j] in string.digits+"[\n`~!@#$%^&*()+=|{}':;',\\[\\].<>《》/?~！@#￥%……&*()——+|{}【】\"‘；：”“’。， 、？]":
                     text+=wd[j]
                 else:
                     break
