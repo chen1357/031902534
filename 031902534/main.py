@@ -6,7 +6,6 @@ import seperation
 class chinese:
     def __init__(self, word):
         self.word=word
-        #self.count=0#出现次数
         self.length=len(word)#长度
         self.pinyin=lazy_pinyin(word)#拼音
         self.pinyinLen=[]#拼音长度
@@ -27,7 +26,7 @@ class chinese:
             j=0
             insert=0
             while(j<len(wd)):
-                if i == self.length or insert == 20 :
+                if i == self.length or insert > 20 :
                     break
                 str1 = "".join(lazy_pinyin(wd[j]))
                 if j+2 <=len(wd) and wd[j:j+2]==self.seperation[i]:#拆字
@@ -35,7 +34,7 @@ class chinese:
                     j+=1
                     i+=1
                     insert=0
-                elif wd[j].lower() == self.pinyin[i][0] or str1 == self.pinyin[i] :#同音字或原文
+                elif str1 == self.pinyin[i] :#同音字或原文 
                     text+=wd[j]
                     i+=1
                     insert=0
@@ -61,7 +60,6 @@ class chinese:
 class english:
     def __init__(self, word):
         self.word=word
-        #self.count=0#出现次数
         self.length=len(word)#长度
     def testing(self,wd):
         text=""
@@ -83,29 +81,38 @@ class english:
                     text=""
         return text,len(text)
 
+def fileOpen(path):#打开文件
+    try:
+        f=open(path,'r+',encoding='utf-8')
+    except IOError:
+        print("文件不存在")
+        raise IOError("文件不存在")
+    else:
+        return f
+
+
 def getWords(address):#获取敏感词
     chinesew=[]#中文
     englishw=[]#英文
-    wordsFile=open(address,'r',encoding='utf-8')
-    for line in wordsFile.readlines():
+    file=fileOpen(address)
+    for line in file.readlines():
         line=line.strip()
         if line[0] in string.ascii_letters:
             englishw.append(english(line))
         else:
             chinesew.append(chinese(line))
-    wordsFile.close()
+    file.close()
     return chinesew,englishw
 
 
 
 
-def search(address,chiWords,engWords):
-    file=open(address,'r',encoding='utf-8')
+def search(lines,chiWords,engWords):
     lineCount=0
     result=[]
     totalCount=0#敏感词个数
     textLen=0
-    for line in file.readlines():#读取每行
+    for line in lines:#读取每行
         lineCount+=1
         line=line.strip()
         i=0
@@ -125,23 +132,32 @@ def search(address,chiWords,engWords):
                     i+=textLen-1
                     break
             i+=1
-    file.close()
     return result,totalCount
 
 
+def parament():#命令行参数检查
+    if len(sys.argv) != 4:
+        print("命令行参数错误")
+        raise Exception("命令行参数错误")
+
+parament()
 
 #文件地址读取
 wordsAddress=(sys.argv[1])#敏感词文件
-fileAddress=(sys.argv[2])#内容文件
+textAddress=(sys.argv[2])#内容文件
 answerAddress=(sys.argv[3])#答案文件
 
 #敏感词读取
 chiWords,engWords=getWords(wordsAddress)#中文，英文
 
 #文本检测
-result,total=search(fileAddress,chiWords,engWords)
+textFile=fileOpen(textAddress)
+lines=textFile.readlines()
+result,total=search(lines,chiWords,engWords)
+textFile.close()
 
 #写入文件
-with open(answerAddress,'w',encoding='utf-8') as answer:
-    answer.write("Total: {} ".format(total)+'\n')
-    answer.write('\n'.join(result))
+answerFile=fileOpen(answerAddress)
+answerFile.write("Total: {} ".format(total)+'\n')
+answerFile.write('\n'.join(result))
+answerFile.close()
