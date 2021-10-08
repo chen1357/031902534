@@ -73,7 +73,7 @@ class english:
                 if wd[j].lower() == self.word[i].lower():
                     text+=wd[j]
                     i+=1
-                elif wd[j] in string.digits+"[\n`~!@#$%^&*()+=|{}':;',\\[\\].<>《》/?~！@#￥%……&*()——+|{}【】\"‘；：”“’。， 、？]":
+                elif wd[j] in string.digits+"[`~!@#$%^&*()+-_=|{}《》':;',\\[].<>/?~！\"@#￥%……&*()——+|{}【】‘；：”“’'。， 、？]":
                     text+=wd[j]
                 else:
                     break
