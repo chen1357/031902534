@@ -17,7 +17,7 @@ class chinese:
             if s !="0":
                 self.seperation.append(s)
             else:
-                self.seperation.append("")
+                self.seperation.append("0")
     def testing(self,wd):
         text=""
         str="".join(lazy_pinyin(wd[0]))
@@ -34,7 +34,7 @@ class chinese:
                     j+=1
                     i+=1
                     insert=0
-                elif str1 == self.pinyin[i] :#同音字或原文 
+                elif str1 == self.pinyin[i] :#同音字或原文
                     text+=wd[j]
                     i+=1
                     insert=0
@@ -47,7 +47,7 @@ class chinese:
                     text+=wd[j]
                     i+=1
                     insert=0
-                elif wd[j] in string.digits+string.ascii_letters+"[\n`~!@#$%^&*()+-_=|{}':;',\\[\\].<>/?~！\"@#￥%……&*()——+|{}【】‘；：”“’。， 、？]":
+                elif wd[j] in string.digits+string.ascii_letters+"[`~!@#$%^&*()+-_=|{}《》':;',\\[].<>/?~！\"@#￥%……&*()——+|{}【】‘；：”“’'。， 、？]":
                     text+=wd[j]
                     insert+=1
                 else:
@@ -73,7 +73,7 @@ class english:
                 if wd[j].lower() == self.word[i].lower():
                     text+=wd[j]
                     i+=1
-                elif wd[j] in string.digits+"[\n`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*()——+|{}【】\"‘；：”“’。， 、？]":
+                elif wd[j] in string.digits+"[\n`~!@#$%^&*()+=|{}':;',\\[\\].<>《》/?~！@#￥%……&*()——+|{}【】\"‘；：”“’。， 、？]":
                     text+=wd[j]
                 else:
                     break
